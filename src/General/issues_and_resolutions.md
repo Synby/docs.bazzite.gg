@@ -44,7 +44,7 @@ Open **Steam Settings → Controller → Non-Game Controller Layouts → Desktop
 
 ---
 
-## Setting Bazzite's Desktop Editions to automatically login
+## Setting Bazzite's Desktop Editions to Automatically Login
 
 === "KDE Plasma"
 
@@ -56,7 +56,7 @@ Open **Steam Settings → Controller → Non-Game Controller Layouts → Desktop
 
 ---
 
-## HTPC legacy hardware setup
+## HTPC Legacy Hardware Setup
 
 As Steam Gaming Mode is not supported on some GPUs, the guide below is a way to set up a similar experience using Bazzite's Desktop image.
 
@@ -68,7 +68,9 @@ https://www.youtube.com/watch?v=F9l-RQvCPMo
 
 If you are using Bazzite's KDE Plasma image, then you can skip the "Making Gnome look more familiar to Windows users" section, and use the steps above to get auto login working in Bazzite KDE. Then finally set Steam Big Picture Mode to auto-start in **Settings → Autostart**.
 
-## No Wi-Fi or wired connection in Bazzite when dual-booting with Windows
+---
+
+## No Wi-Fi or Wired Connection in Bazzite When Dual-Booting with Windows
 
 If you are dual-booting Windows with Bazzite and your Wi-Fi/wired connection works in Windows but fails in Bazzite sometimes, it is highly likely this is due to Windows Fast Startup.
 
@@ -267,7 +269,7 @@ In [Bazzite Portal](/Installing_and_Managing_Software/Bazzite_Portal), select **
 
 !!! info "Native mode builds `linux-cec` from Valve's upstream GitLab repo and includes the inputattach CEC units and linuxconsoletools, so Pulse-Eight style adapters can be attached to the kernel CEC subsystem. However, Ugreen HDMI Adapters are known to behave inconsistently when using Native mode."
 
-## Nvidia Optimus GPU not detected on laptops
+## Nvidia Optimus GPU not Detected on Laptops
 
 If you are running Bazzite on a laptop with an Nvidia Optimus GPU, you might notice that games are running poorly and seem to be running on the integrated GPU.
 
@@ -289,7 +291,7 @@ In this case, you should update all Flatpaks in **Bazaar**, or select **Update N
 
 ---
 
-## Waking from sleep doesn't work with some Gigabyte motherboard
+## Waking from Sleep Doesn't Work with Some Gigabyte Motherboards
 
 <small>_Why does Life Slumber? ...Because Gigabyte motherboards can't wake from sleep._</small>
 
@@ -303,7 +305,7 @@ ujust _toggle-gigabyte-wake-fix
 
 ---
 
-## Xbox controller over Bluetooth is stuck on a connecting loop and the Xbox button keeps flashing
+## Xbox Controller over Bluetooth is Stuck on a Connecting Loop and the Xbox Button Keeps Flashing
 
 This is because your controller is not on the latest firmware.
 
@@ -313,7 +315,7 @@ A more advanced way is to spin up a Windows VM and passthrough the controller to
 
 ---
 
-## My Cursor is Flickering/ has Disappeared
+## My Cursor is Flickering or has Disappeared
 
 This is typically due to bugs in the GPU drivers. You can temporarily disable Hardware Cursors as a workaround.
 
