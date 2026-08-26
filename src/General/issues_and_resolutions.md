@@ -14,17 +14,6 @@ If you encounter this issue, close Steam completely and start Steam using the **
 
 ---
 
-## Audio is soft on ASUS ROG Ally hardware
-
-There are two audio devices that appear on the Rog Ally:
-
--   **Family 17h/19h/1ah HD Audio Controller**
--   **ROG Ally**
-
-Both affect each other's audio volume, so they must be at the same volume level.
-
----
-
 ## Disable Special Character Pop-Up on KDE Plasma
 
 KDE Plasma 6.7 added the Plasma Keyboard feature, which shows an on-screen pop-up when certain keys are held for a period.
