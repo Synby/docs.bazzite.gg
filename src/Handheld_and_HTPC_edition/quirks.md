@@ -18,6 +18,20 @@ title: Steam Gaming Mode Quirks and Workarounds
 
 ---
 
+## Wi-Fi is slow / Wi-Fi lag spikes
+
+The Wi-Fi power saving feature in Linux may work poorly on some devices. If the problem is not present in Windows, you may try the solution below.
+
+!!! info "This section is for devices running the `-deck` images. For desktop images, see [here](/General/issues_and_resolutions/#wi-fi-is-slow-wi-fi-lag-spikes)."
+
+If you are using Steam Gaming Mode (i.e. not booting straight into a desktop environment like KDE or GNOME), try:
+
+1. Steam Settings → System → Enable Developer Mode
+2. Steam Settings → Developer → Uncheck **Enable Wi-Fi Power Management**
+3. Reboot
+
+---
+
 ## My Gamepad Menu is Missing
 
 !!! info "OpenGamepadUI is disabled by default for the Steam Deck and HTPCs."
@@ -163,9 +177,7 @@ Steam Gaming Mode has no official way to change the physical keyboard layout and
 **Scenarios where this is desirable**:
 
 - Keyboard and mouse does not work for a certain game
-
 - The game’s launcher for adjusting video settings or adding mods does not launch
-
 - Certain features/graphics options are not available
 
 Open the game's properties on Steam and [**add this launch option**](/Gaming/launch-options-env-variables/#where-to-set-launch-options):

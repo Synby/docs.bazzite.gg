@@ -99,17 +99,13 @@ You can do this by:
 
 Now if you now select the Shutdown option, Windows will shut down completely and not interfere with Bazzite.
 
-## Wi-Fi is slow / Wi-Fi lag spikes
+---
+
+## Wi-Fi is Slow / Wi-Fi Lag Spikes
 
 The Wi-Fi power saving feature in Linux may work poorly on some devices. If the problem is not present in Windows, you may try the solution below. 
 
-If you are using Steam Gaming Mode (i.e. not booting straight into a desktop environment like KDE or GNOME), try:
-
-1. Steam settings -> System -> "Enable Developer Mode"
-2. Steam settings -> Developer -> Uncheck "Enable Wi-Fi Power Management"
-3. Reboot
-
-If the above does not work, and/or for users booting straight into a desktop environment like KDE or Gnome, try:
+> For devices running the `-deck` image, please follow instructions [here](/Handheld_and_HTPC_edition/quirks/#wi-fi-is-slow-wi-fi-lag-spikes).
 
 Open the terminal and run `ip link show`, this will list all your network devices and the output should look something like this:
 
@@ -129,32 +125,47 @@ Next, run `iw wlp6s0 get power_save` (change `wlp6s0` if your device name is dif
 Power save: on
 ```
 
-There are different steps to resolve this depending on your current Wi-Fi backend.
-!!! info "[`iwd`](https://wiki.archlinux.org/title/Iwd) has been abandoned due to Intel shifting their priorities away from open source. You may still try it to fix lag spikes caused by [`wpa_supplicant`](https://wiki.archlinux.org/title/Wpa_supplicant), but it may stop working at anytime and is thus highly advisable to [switch your Wi-Fi backend](./#switching-wi-fi-backends) to [`wpa_supplicant`](https://wiki.archlinux.org/title/Wpa_supplicant)."
+We may then configure NetworkManager to disable the power save feature for all Wi-Fi devices. Open a terminal and run
 
-=== "wpa_supplicant (iwd is OFF)"
+```bash
+echo -e "[connection]\nwifi.powersave = 2" | sudo tee /etc/NetworkManager/conf.d/wifi-powersave-off.conf
+systemctl restart NetworkManager
+```
 
-    We are going to configure NetworkManager to not use the power save feature for all Wi-Fi devices. Open a terminal and run
+Next, run `iw wlp6s0 get power_save` to confirm that power save is off:
+```
+Power save: off
+```
 
-    ```bash
-    echo -e "[connection]\nwifi.powersave = 2" | sudo tee /etc/NetworkManager/conf.d/wifi-powersave-off.conf
-    systemctl restart NetworkManager
-    ```
+!!! warning "This fix may negatively affect the battery life of your laptop or handheld."
 
-    Next, run `iw wlp6s0 get power_save` to confirm that power save is off:
-    ```
-    Power save: off
-    ```
+If you wish to reverse this change, delete the config file:
+```bash
+sudo rm /etc/NetworkManager/conf.d/wifi-powersave-off.conf
+systemctl restart NetworkManager
+```
 
-    !!! warning "This fix may negatively affect the battery life of your laptop or handheld."
+---
+
+## `iwd` Specific Issues
+
+??? quote "Expand to learn more"
+
+    [`iwd`](https://wiki.archlinux.org/title/Iwd) has been abandoned due to Intel shifting their priorities away from open source. It is no longer included in recent images as it does not work with newer kernels, and these instructions are only kept for the sake of completeness.
+
+    !!! warning "The following are [`iwd`](https://wiki.archlinux.org/title/Iwd) specific issues. It is highly advisable to [switch your Wi-Fi backend](./#switching-wi-fi-backends) to [`wpa_supplicant`](https://wiki.archlinux.org/title/Wpa_supplicant) as the [`iwd`](https://wiki.archlinux.org/title/Iwd) project is no longer maintained by Intel."
     
-    If you wish to reverse this change, delete the config file:
-    ```bash
-    sudo rm /etc/NetworkManager/conf.d/wifi-powersave-off.conf
-    systemctl restart NetworkManager
-    ```
+    !!! info "On recent images where [`iwd`](https://wiki.archlinux.org/title/Iwd) is removed, your backend will be automatically switched to [`wpa_supplicant`](https://wiki.archlinux.org/title/Wpa_supplicant) during boot up of the new image. The following instructions only apply for images where [`iwd`](https://wiki.archlinux.org/title/Iwd) is still present."
+
+    ---
+
+    ### Switching Wi-Fi Backends
+
+    To switch your Wi-Fi backend, open [Bazzite Portal](/Installing_and_Managing_Software/Bazzite_Portal/), and under the **Troubleshooting** page, select **Change Wi-Fi system back-end**.
     
-=== "iwd (iwd is ON)"
+    ---
+
+    ### Wi-Fi is slow / Wi-Fi lag spikes - IWD
 
     We are going to configure iwd to not use the power save feature for all Wi-Fi devices. Open a terminal and run
 
@@ -176,91 +187,83 @@ There are different steps to resolve this depending on your current Wi-Fi backen
     systemctl restart iwd
     ```
 
----
+    ---
 
-## Error on connecting to Wi-Fi: "Failed to add new connection: 802.1x connections must have IWD provisioning files"
+    ### Error on connecting to Wi-Fi: "Failed to add new connection: 802.1x connections must have IWD provisioning files"
 
-!!! warning "This is an [`iwd`](https://wiki.archlinux.org/title/Iwd) specific issue. It is highly advisable to [switch your Wi-Fi backend](./#switching-wi-fi-backends) to [`wpa_supplicant`](https://wiki.archlinux.org/title/Wpa_supplicant) as the [`iwd`](https://wiki.archlinux.org/title/Iwd) project is no longer maintained by Intel."
+    NetworkManager cannot automatically generate 802.1x connections when using the `iwd` backend.
 
-NetworkManager cannot automatically generate 802.1x connections when using the `iwd` backend.
+    If you need to continue using the `iwd` backend and just want to connect to `eduroam`, follow these steps:
 
-If you need to continue using the `iwd` backend and just want to connect to `eduroam`, follow these steps:
+    ```bash
+    sudo nano /var/lib/iwd/eduroam.8021x
+    ```
 
-```bash
-sudo nano /var/lib/iwd/eduroam.8021x
-```
+    Then add the following:
 
-Then add the following:
+    ```bash
+    [Security]
+    EAP-Method=PEAP
+    EAP-Identity=anonymous@<university.domain>
+    EAP-PEAP-Phase2-Method=MSCHAPV2
+    EAP-PEAP-Phase2-Identity=<username@university.domain>
+    EAP-PEAP-Phase2-Password=<password>
 
-```bash
-[Security]
-EAP-Method=PEAP
-EAP-Identity=anonymous@<university.domain>
-EAP-PEAP-Phase2-Method=MSCHAPV2
-EAP-PEAP-Phase2-Identity=<username@university.domain>
-EAP-PEAP-Phase2-Password=<password>
+    [Settings]
+    AutoConnect=true
+    ```
 
-[Settings]
-AutoConnect=true
-```
+    Make sure to replace `<university.domain>`, `<username@university.domain>` and `<password>` with proper login information. Afterwards, press `Ctrl+X` and `Y` to Save & Exit.
 
-Make sure to replace `<university.domain>`, `<username@university.domain>` and `<password>` with proper login information. Afterwards, press `Ctrl+X` and `Y` to Save & Exit.
+    Now try to connect again. If you still can't connect, execute:
 
-Now try to connect again. If you still can't connect, execute:
+    ```bash
+    nmcli connection modify eduroam 802-1x.phase1-auth-flags 32
+    ```
 
-```bash
-nmcli connection modify eduroam 802-1x.phase1-auth-flags 32
-```
+    And try to connect again.
 
-And try to connect again.
+    ---
 
----
+    ### Error on connecting to Wi-Fi: "IP configuration was unavailable" when connecting to 802.1x wireless networks
 
-## Error on connecting to Wi-Fi: "IP configuration was unavailable" when connecting to 802.1x wireless networks
+    !!! warning "This is an [`iwd`](https://wiki.archlinux.org/title/Iwd) specific issue. It is highly advisable to [switch your Wi-Fi backend](./#switching-wi-fi-backends) to [`wpa_supplicant`](https://wiki.archlinux.org/title/Wpa_supplicant) as the [`iwd`](https://wiki.archlinux.org/title/Iwd) project is no longer maintained by Intel."
 
-!!! warning "This is an [`iwd`](https://wiki.archlinux.org/title/Iwd) specific issue. It is highly advisable to [switch your Wi-Fi backend](./#switching-wi-fi-backends) to [`wpa_supplicant`](https://wiki.archlinux.org/title/Wpa_supplicant) as the [`iwd`](https://wiki.archlinux.org/title/Iwd) project is no longer maintained by Intel."
+    !!! warning "[`iwd`](https://wiki.archlinux.org/title/Iwd) is no longer included in recent images as it does not work with newer kernels. These instructions are only kept for the sake of completeness."
 
-Check the system logs with `ujust logs-this-boot | grep NetworkManager`, you should be able to see that 
+    Check the system logs with `ujust logs-this-boot | grep NetworkManager`, you should be able to see that 
 
-```
-NetworkManager[1563]: <info>  [1770094603.8488] device (wlan0): state change: failed -> disconnected (reason 'none', managed-type: 'full')
-NetworkManager[1563]: <info>  [1770094603.8568] dhcp4 (wlan0): canceled DHCP transaction
-NetworkManager[1563]: <info>  [1770094603.8569] dhcp4 (wlan0): activation: beginning transaction (timeout in 45 seconds)
-NetworkManager[1563]: <info>  [1770094603.8569] dhcp4 (wlan0): state changed no lease
-```
+    ```
+    NetworkManager[1563]: <info>  [1770094603.8488] device (wlan0): state change: failed -> disconnected (reason 'none', managed-type: 'full')
+    NetworkManager[1563]: <info>  [1770094603.8568] dhcp4 (wlan0): canceled DHCP transaction
+    NetworkManager[1563]: <info>  [1770094603.8569] dhcp4 (wlan0): activation: beginning transaction (timeout in 45 seconds)
+    NetworkManager[1563]: <info>  [1770094603.8569] dhcp4 (wlan0): state changed no lease
+    ```
 
-When using the `iwd` backend, NetworkManager may be unable to obtain a DHCP lease on an Enterprise network if you have connected to it previously on a different backend or a different OS. 
+    When using the `iwd` backend, NetworkManager may be unable to obtain a DHCP lease on an Enterprise network if you have connected to it previously on a different backend or a different OS. 
 
-If you prefer to keep using the `iwd` backend, follow these steps:
+    If you prefer to keep using the `iwd` backend, follow these steps:
 
-```bash
-sudo mkdir -p /etc/iwd/
-sudo nano /etc/iwd/main.conf
-```
+    ```bash
+    sudo mkdir -p /etc/iwd/
+    sudo nano /etc/iwd/main.conf
+    ```
 
-Then add the following:
+    Then add the following:
 
-```ini
-[General]
-AddressRandomization=network
-```
+    ```ini
+    [General]
+    AddressRandomization=network
+    ```
 
-Afterwards, press `Ctrl+X` and `Y` to Save & Exit, then reload `iwd` by running:
+    Afterwards, press `Ctrl+X` and `Y` to Save & Exit, then reload `iwd` by running:
 
-```bash
-systemctl daemon-reload
-systemctl restart iwd
-```
+    ```bash
+    systemctl daemon-reload
+    systemctl restart iwd
+    ```
 
-You should be able to connect to the enterprise network.
-
----
-
-## Switching Wi-Fi Backends
-
-!!! info "[`iwd`](https://wiki.archlinux.org/title/Iwd) has been abandoned due to Intel shifting their priorities away from open source. You may still try it to fix lag spikes caused by [`wpa_supplicant`](https://wiki.archlinux.org/title/Wpa_supplicant), but it may stop working at anytime and is thus highly advisable to [switch your Wi-Fi backend](./#switching-wi-fi-backends) to [`wpa_supplicant`](https://wiki.archlinux.org/title/Wpa_supplicant)."
-
-To switch your Wi-Fi backend, open [Bazzite Portal](/Installing_and_Managing_Software/Bazzite_Portal/), and under the **Troubleshooting** page, select **Change Wi-Fi system back-end**.
+    You should be able to connect to the enterprise network.
 
 ---
 
