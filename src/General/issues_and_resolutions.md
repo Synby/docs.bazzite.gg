@@ -4,13 +4,27 @@ title: Common Issues & Resolutions
 
 # Common Issues & Resolution
 
-## Steam Big Picture Mode is slow
+## Cursor is Flickering or has Disappeared
 
-When you select **Steam Menu → View → Big Picture** the user interface runs sluggishly, while the games that run through the interface works smoothly.
+This is typically due to bugs in the GPU drivers. You can temporarily disable Hardware Cursors as a workaround.
 
-If you encounter this issue, close Steam completely and start Steam using the **Steam Big Picture Mode** menu shortcut. Also make sure that **Steam Settings → Interface → Enable GPU accelerated rendering in web views (requires restart)** is enabled in the Steam settings.
+=== "KDE Plasma"
 
->**Note**: This fix also fixes the performance issues in Steam Gaming Mode on Nvidia GPUs, however, this comes with a drawback that the Steam menu and side menu sometimes do not render properly.
+    Add an environment variable with this command:
+
+    ```bash
+    echo "KWIN_FORCE_SW_CURSOR=1" > ~/.config/environment.d/99-kwin-force-sw-cursor.conf
+    ```
+
+=== "GNOME"
+
+    Add an environment variable with this command:
+
+    ```bash
+    echo "MUTTER_DEBUG_DISABLE_HW_CURSORS=1" > ~/.config/environment.d/99-mutter-disable-hw-cursor.conf
+    ```
+    
+!!! warning "This fix may negatively affect the battery life of your laptop or handheld."
 
 ---
 
@@ -24,6 +38,16 @@ You may disable it in **System Settings → Keyboard → On-Screen Keyboard → 
 
 ---
 
+## Dolphin SMB Share does not work
+
+This is because Atomic installations handles Groups and Users slightly differently, and puts them somewhere different to where Dolphin expects, so the button to add user to group does not actually work.
+
+You will need to manually add your user to the **`usershares`** group.
+
+> Detailed instructions can be found [here](/Advanced/add-user-to-group).
+
+---
+
 ## Firefox and KeePassXC Does Not Work Together
 
 This is because KeePassXC(or other password managers installed via Flatpak) is sandboxed and can only be accessed by a non-sandboxed application.
@@ -31,6 +55,16 @@ This is because KeePassXC(or other password managers installed via Flatpak) is s
 You may try installing Firefox and KeePassXC via distrobox, though there may be problems regarding hardware acceleration.
 
 !!! info "Alternatively, you may also try [this guide](https://discourse.flathub.org/t/how-to-run-firefox-and-keepassxc-in-a-flatpak-and-get-the-keepassxc-browser-add-on-to-work/437). Note that Bazzite officially neither maintains nor endorses the aforementioned guide and it is only included for the sake of completeness. Only follow it at **your own risk**. "
+
+---
+
+## Flatpak Apps have no Hardware Acceleration on Nvidia
+
+If you have recently updated Bazzite on a device with an Nvidia GPU, you might notice that Flatpak applications are running poorly and/or have no hardware acceleration, and/or receive a warning about **Nvidia Flatpak Runtime mismatch**.
+
+In this case, you should update all Flatpaks in **Bazaar**, or select **Update Nvidia Flatpak Runtime** under **Bazzite Portal** → **Manage Bazzite** if you do not want to update other Flatpaks.
+
+!!! info "Bazzite provides a systemd service that automates this, but you may still need to update it manually in some situations (e.g. No Internet connection on startup). The ideal solution is for upstream Flatpak/Nvidia to improve the way these Runtimes are handled, or to create a package that provides a Flatpak Nvidia driver using system libraries, but those require a lot more work to make possible."
 
 ---
 
@@ -44,15 +78,16 @@ Open **Steam Settings → Controller → Non-Game Controller Layouts → Desktop
 
 ---
 
-## Setting Bazzite's Desktop Editions to Automatically Login
+## HDMI-CEC Does Not Work Consistently
 
-=== "KDE Plasma"
+In [Bazzite Portal](/Installing_and_Managing_Software/Bazzite_Portal), select **Troubleshoot → Change CEC mode**:
 
-    Open **System Settings → Colors and Themes → Login Screen**. On that screen, tick **"Automatically log in"**, select your user and for the session, select **"Plasma"** and don't forget to to click on the **"Apply"** button.
-    
-=== "GNOME"
+!!! note "`cecd` is known to interfere with wakeup on HTPC setups that use dongles. Try setting dGPU mode and see if HDMI-CEC behavior is consistent."
 
-    Open the **Settings application → Users**. Click the **Unlock** button in the top right corner. Then switch on **Automatic Login**.
+*   dGPU mode (Legacy): Use the “legacy” cec-control services using `libcec` and `cec-ctl`, known to work pretty well on HTPCs with things like pulse8 and ugreen adaptors. These adapters are typically used to work around dGPUs not having cec pin 13 wired up. 
+*   Native mode (New): Use Valve's newer `linux-cec`/`cecd` system instead and mask the legacy services.
+
+!!! info "Native mode builds `linux-cec` from Valve's upstream GitLab repo and includes the inputattach CEC units and linuxconsoletools, so Pulse-Eight style adapters can be attached to the kernel CEC subsystem. However, Ugreen HDMI Adapters are known to behave inconsistently when using Native mode."
 
 ---
 
@@ -70,7 +105,7 @@ If you are using Bazzite's KDE Plasma image, then you can skip the "Making Gnome
 
 ---
 
-## No Wi-Fi or Wired Connection in Bazzite When Dual-Booting with Windows
+## No Network Connection in Bazzite When Dual-Booting with Windows
 
 If you are dual-booting Windows with Bazzite and your Wi-Fi/wired connection works in Windows but fails in Bazzite sometimes, it is highly likely this is due to Windows Fast Startup.
 
@@ -89,6 +124,40 @@ You can do this by:
 ![how to disable fast startup in Windows](../img/disable-windows-fast-startup.gif)
 
 Now if you now select the Shutdown option, Windows will shut down completely and not interfere with Bazzite.
+
+---
+
+## Nvidia Optimus GPU not Detected on Laptops
+
+If you are running Bazzite on a laptop with an Nvidia Optimus GPU, you might notice that games are running poorly and seem to be running on the integrated GPU.
+
+In this case, use the preinstalled [Cardwire](https://github.com/OpenGamingCollective/cardwire) app to configure your GPU Power Options. You may simply search **cardwire** to open the app.
+
+> Learn more about Cardwire [here](/Advanced/cardwire)!
+
+!!! info "If you are looking for **Advanced Optimus** functions, we regret to tell you that there are currently **no** working way to dynamically MUX displays outside of some very early work on AMD SmartMUX. Changing MUX settings currently **requires** a reboot."
+
+---
+
+## Setting Bazzite's Desktop Editions to Automatically Login
+
+=== "KDE Plasma"
+
+    Open **System Settings → Colors and Themes → Login Screen**. On that screen, tick **"Automatically log in"**, select your user and for the session, select **"Plasma"** and don't forget to to click on the **"Apply"** button.
+    
+=== "GNOME"
+
+    Open the **Settings application → Users**. Click the **Unlock** button in the top right corner. Then switch on **Automatic Login**.
+
+---
+
+## Steam Big Picture Mode is slow
+
+When you select **Steam Menu → View → Big Picture** the user interface runs sluggishly, while the games that run through the interface works smoothly.
+
+If you encounter this issue, close Steam completely and start Steam using the **Steam Big Picture Mode** menu shortcut. Also make sure that **Steam Settings → Interface → Enable GPU accelerated rendering in web views (requires restart)** is enabled in the Steam settings.
+
+>**Note**: This fix also fixes the performance issues in Steam Gaming Mode on Nvidia GPUs, however, this comes with a drawback that the Steam menu and side menu sometimes do not render properly.
 
 ---
 
@@ -138,7 +207,7 @@ systemctl restart NetworkManager
 
 ---
 
-## `iwd` Specific Issues
+### `iwd` Specific Issues
 
 ??? quote "Expand to learn more"
 
@@ -150,13 +219,13 @@ systemctl restart NetworkManager
 
     ---
 
-    ### Switching Wi-Fi Backends
+    #### Switching Wi-Fi Backends
 
     To switch your Wi-Fi backend, open [Bazzite Portal](/Installing_and_Managing_Software/Bazzite_Portal/), and under the **Troubleshooting** page, select **Change Wi-Fi system back-end**.
     
     ---
 
-    ### Wi-Fi is slow / Wi-Fi lag spikes - IWD
+    #### Wi-Fi is slow / Wi-Fi lag spikes - IWD
 
     We are going to configure iwd to not use the power save feature for all Wi-Fi devices. Open a terminal and run
 
@@ -180,7 +249,7 @@ systemctl restart NetworkManager
 
     ---
 
-    ### Error on connecting to Wi-Fi: "Failed to add new connection: 802.1x connections must have IWD provisioning files"
+    #### Error on connecting to Wi-Fi: "Failed to add new connection: 802.1x connections must have IWD provisioning files"
 
     NetworkManager cannot automatically generate 802.1x connections when using the `iwd` backend.
 
@@ -216,7 +285,7 @@ systemctl restart NetworkManager
 
     ---
 
-    ### Error on connecting to Wi-Fi: "IP configuration was unavailable" when connecting to 802.1x wireless networks
+    #### Error on connecting to Wi-Fi: "IP configuration was unavailable" when connecting to 802.1x wireless networks
 
     !!! warning "This is an [`iwd`](https://wiki.archlinux.org/title/Iwd) specific issue. It is highly advisable to [switch your Wi-Fi backend](./#switching-wi-fi-backends) to [`wpa_supplicant`](https://wiki.archlinux.org/title/Wpa_supplicant) as the [`iwd`](https://wiki.archlinux.org/title/Iwd) project is no longer maintained by Intel."
 
@@ -258,39 +327,6 @@ systemctl restart NetworkManager
 
 ---
 
-## HDMI-CEC Does Not Work Consistently
-
-In [Bazzite Portal](/Installing_and_Managing_Software/Bazzite_Portal), select **Troubleshoot → Change CEC mode**:
-
-!!! note "`cecd` is known to interfere with wakeup on HTPC setups that use dongles. Try setting dGPU mode and see if HDMI-CEC behavior is consistent."
-
-*   dGPU mode (Legacy): Use the “legacy” cec-control services using `libcec` and `cec-ctl`, known to work pretty well on HTPCs with things like pulse8 and ugreen adaptors. These adapters are typically used to work around dGPUs not having cec pin 13 wired up. 
-*   Native mode (New): Use Valve's newer `linux-cec`/`cecd` system instead and mask the legacy services.
-
-!!! info "Native mode builds `linux-cec` from Valve's upstream GitLab repo and includes the inputattach CEC units and linuxconsoletools, so Pulse-Eight style adapters can be attached to the kernel CEC subsystem. However, Ugreen HDMI Adapters are known to behave inconsistently when using Native mode."
-
-## Nvidia Optimus GPU not Detected on Laptops
-
-If you are running Bazzite on a laptop with an Nvidia Optimus GPU, you might notice that games are running poorly and seem to be running on the integrated GPU.
-
-In this case, use the preinstalled [Cardwire](https://github.com/OpenGamingCollective/cardwire) app to configure your GPU Power Options. You may simply search **cardwire** to open the app.
-
-> Learn more about Cardwire [here](/Advanced/cardwire)!
-
-!!! info "If you are looking for **Advanced Optimus** functions, we regret to tell you that there are currently **no** working way to dynamically MUX displays outside of some very early work on AMD SmartMUX. Changing MUX settings currently **requires** a reboot."
-
----
-
-## Flatpak Apps have no Hardware Acceleration on Nvidia
-
-If you have recently updated Bazzite on a device with an Nvidia GPU, you might notice that Flatpak applications are running poorly and/or have no hardware acceleration, and/or receive a warning about **Nvidia Flatpak Runtime mismatch**.
-
-In this case, you should update all Flatpaks in **Bazaar**, or select **Update Nvidia Flatpak Runtime** under **Bazzite Portal** → **Manage Bazzite** if you do not want to update other Flatpaks.
-
-!!! info "Bazzite provides a systemd service that automates this, but you may still need to update it manually in some situations (e.g. No Internet connection on startup). The ideal solution is for upstream Flatpak/Nvidia to improve the way these Runtimes are handled, or to create a package that provides a Flatpak Nvidia driver using system libraries, but those require a lot more work to make possible."
-
----
-
 ## Waking from Sleep Doesn't Work with Some Gigabyte Motherboards
 
 <small>_Why does Life Slumber? ...Because Gigabyte motherboards can't wake from sleep._</small>
@@ -312,39 +348,5 @@ This is because your controller is not on the latest firmware.
 The easiest solution here is to connect the controller to a Windows machine. Download the Xbox Accessories app and update the controller to the latest firmware. After that, the controller should connect seamlessly. 
 
 A more advanced way is to spin up a Windows VM and passthrough the controller to do the firmware update there.
-
----
-
-## My Cursor is Flickering or has Disappeared
-
-This is typically due to bugs in the GPU drivers. You can temporarily disable Hardware Cursors as a workaround.
-
-=== "KDE Plasma"
-
-    Add an environment variable with this command:
-
-    ```bash
-    echo "KWIN_FORCE_SW_CURSOR=1" > ~/.config/environment.d/99-kwin-force-sw-cursor.conf
-    ```
-
-=== "GNOME"
-
-    Add an environment variable with this command:
-
-    ```bash
-    echo "MUTTER_DEBUG_DISABLE_HW_CURSORS=1" > ~/.config/environment.d/99-mutter-disable-hw-cursor.conf
-    ```
-    
-!!! warning "This fix may negatively affect the battery life of your laptop or handheld."
-
----
-
-## Dolphin SMB Share does not work
-
-This is because Atomic installations handles Groups and Users slightly differently, and puts them somewhere different to where Dolphin expects, so the button to add user to group does not actually work.
-
-You will need to manually add your user to the **`usershares`** group.
-
-> Detailed instructions can be found [here](/Advanced/add-user-to-group).
 
 ---
