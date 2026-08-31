@@ -1,8 +1,10 @@
 ---
-title: Handheld Compatibility
+title: Handheld Wiki
 ---
 
-# Handheld Compatibility
+# Handheld Wiki
+
+> This is a more general guide. For troubleshooting, see [Steam Gaming Mode Quirks](/Handheld_and_HTPC_edition/quirks.md).
 
 ## SteamOS-like Functionality
 
